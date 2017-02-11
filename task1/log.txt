@@ -1,0 +1,12 @@
+$ git log
+commit 451c20e38ef285f9e64991d1d381b06f26f77158
+Author: MaryRGB <mary_corr@mail.ru>
+Date:   Sat Feb 11 13:20:24 2017 +0300
+
+    add status.txt
+
+commit b0b3cbe9761b64da82fb648bf04880c10e5145ab
+Author: MaryRGB <mary_corr@mail.ru>
+Date:   Sat Feb 11 13:16:25 2017 +0300
+
+    add .gitignore
