@@ -2,103 +2,48 @@
 <html lang="ru">
 <head>
     <meta charset="utf-8">
-    <meta name = "viewport" content="width=device-width, initial-scale=1.0" >
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" >
     <title>LightNews</title>
     <link rel="stylesheet" href="styles.css" />
-    <script src = "jscript.js"></script>
+    <script src="jscript.js"></script>
 </head>
 <body>
 <header class="head">
-    <img class = "logo" src="http://www.graycell.ru/picture/big/mayak2.jpg" alt="logo">
-    <h1 id = "sitename" ><span class = "change_color">Light</span>News</h1>
-    <button class = "sign">Выход</button>
-    <p class = "user">Марина Карп</p>
+    <img class="logo" src="http://www.graycell.ru/picture/big/mayak2.jpg" alt="logo">
+    <h1 id="sitename" ><span class="change_color">Light</span>News</h1>
+    <button class="sign">Вход</button>
+    <p class="user"></p>
 </header>
-<p class ="c1"></p>
-<a href ="#">
-    <div class="article">
-        <h3 class = "title">В чём дело, док?</h3>
-        <p class = "tag">#мультфилмы</p>
-        <p class = "cl"></p>
-        <p class = "time">12:45</p>
-        <p class="description">Знаменитые фразы и образы всех героев Луни Тюнз</p>
-        <p class = "clear"></p>
-        <p class = "date">26.02.2017</p>
-        <p class = "author">Андрей Левицкий</p>
-    </div>
-</a>
-<a href ="#">
-    <div class="article">
-        <h3 class = "title">Лучшие пейзажи мира</h3>
-        <p class = "tag">#природа</p>
-        <p class = "cl"></p>
-        <p class = "time">13:05</p>
-        <p class="description">Подбока мест, где стоит побывать.</p>
-        <p class = "clear"></p>
-        <p class = "date">23.02.2017</p>
-        <p class = "author">Андрей Левицкий</p>
-    </div>
-</a>
-<div class = "filter">
-    <p id="string"><span class="strong">Фильтр</span> поможет вам:</p>
-    <p><input class="in1" value="Имя Автора"></p>
-    <p><input class="in2"  value="Дата"></p>
-    <p><input class="in3" value="#тег"></p>
-    <button class = "filt">Применить</button>
-    <button class = "create">Добавить новость</button>
+<div class="left-column">
+    <p class="c1"></p>
+    <template id="template-article">
+        <a href ="#">
+            <div class="article" id="">
+                <h3 class = "title"></h3>
+                <p class = "tag"></p>
+                <p class = "cl"></p>
+                <p class = "time"></p>
+                <p class="summary"></p>
+                <p class = "clear"></p>
+                <p class = "date"></p>
+                <p class = "author"></p>
+            </div>
+        </a>
+    </template>
 </div>
-<a href ="#">
-    <div class="article">
-        <h3 class = "title">Возвращение "раскладушек"</h3>
-        <p class = "tag">#технологии</p>
-        <p class = "cl"></p>
-        <p class = "time">20:45</p>
-        <p class="description">Компания Sumsung Electronics активно разрабатывает смартфоны со сгибающимися дисплеями.</p>
-        <p class = "clear"></p>
-        <p class = "date">24.02.2017</p>
-        <p class = "author">Андрей Левицкий</p>
+<div class="right-colum">
+    <div class="filter">
+        <p id="string"><span class="strong">Фильтр</span> поможет вам:</p>
+        <input class="in1" placeholder="Имя Автора"/>
+        <input class="in2"  placeholder="с какого числа"/>
+        <input class="in3" placeholder="по какое число"/>
+        <button class="filt">Применить</button>
+        <button class="create" hidden="true">Добавить новость</button>
     </div>
-</a>
-
-<a href ="#">
-    <div class="article">
-        <h3 class = "title">Возвращение "раскладушек"</h3>
-        <p class = "tag">#технологии</p>
-        <p class = "cl"></p>
-        <p class = "time">10:45</p>
-        <p class="description">Компания Sumsung Electronics активно разрабатывает смартфоны со сгибающимися дисплеями.</p>
-        <p class = "clear"></p>
-        <p class = "date">22.02.2017</p>
-        <p class = "author">Андрей Левицкий</p>
-    </div>
-</a>
-<a href ="#">
-    <div class="article">
-        <h3 class = "title">Возвращение "раскладушек"</h3>
-        <p class = "tag">#технологии</p>
-        <p class = "cl"></p>
-        <p class = "time">10:45</p>
-        <p class="description">Компания Sumsung Electronics активно разрабатывает смартфоны со сгибающимися дисплеями.</p>
-        <p class = "clear"></p>
-        <p class = "date">24.02.2017</p>
-        <p class = "author">Андрей Левицкий</p>
-    </div>
-</a>
-<a href ="#">
-    <div class="article">
-        <h3 class = "title">Возвращение "раскладушек"</h3>
-        <p class = "tag">#технологии</p>
-        <p class = "cl"></p>
-        <p class = "time">10:45</p>
-        <p class="description">Компания Sumsung Electronics активно разрабатывает смартфоны со сгибающимися дисплеями.</p>
-        <p class = "clear"></p>
-        <p class = "date">20.02.2017</p>
-        <p class = "author">Андрей Левицкий</p>
-    </div>
-</a>
-<p id = "c2"></p>
-<button id = "next">Ещё</button>
-<footer class = "foot">
+</div>
+<p id="c2"></p>
+<button id="next">Ещё</button>
+<footer class="foot">
     <p>LightNews, 21.02.2017<br>
         MaryRGB@почта<br>
         MaryRGB, 2 курс</p>
