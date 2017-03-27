@@ -2,51 +2,108 @@
 <html lang="ru">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1.0" >
+    <meta name = "viewport" content="width=device-width, initial-scale=1.0" >
     <title>LightNews</title>
     <link rel="stylesheet" href="styles.css" />
-    <script src="jscript.js"></script>
 </head>
 <body>
-<header class="head">
-    <img class="logo" src="http://www.graycell.ru/picture/big/mayak2.jpg" alt="logo">
-    <h1 id="sitename" ><span class="change_color">Light</span>News</h1>
-    <button class="sign">Вход</button>
-    <p class="user"></p>
+<header id = "head">
+    <img id = "logo" src="http://www.graycell.ru/picture/big/mayak2.jpg" alt="logo">
+    <h1 id = "sitename" ><span id = "change_color">Light</span>News</h1>
+    <button id = "sign">Вход</button>
+    <button class="create" title="Добавить новость"><p class="add">+</p></button>
+    <p id = "user"></p>
 </header>
+<p class="cleaner"></p>
+
 <div class="left-column">
-    <p class="c1"></p>
     <template id="template-article">
         <a href ="#">
             <div class="article" id="">
                 <h3 class = "title"></h3>
                 <p class = "tag"></p>
-                <p class = "cl"></p>
                 <p class = "time"></p>
                 <p class="summary"></p>
-                <p class = "clear"></p>
+                <p class = "cleaner"></p>
                 <p class = "date"></p>
                 <p class = "author"></p>
             </div>
         </a>
     </template>
 </div>
-<div class="right-colum">
-    <div class="filter">
-        <p id="string"><span class="strong">Фильтр</span> поможет вам:</p>
-        <input class="in1" placeholder="Имя Автора"/>
-        <input class="in2"  placeholder="с какого числа"/>
-        <input class="in3" placeholder="по какое число"/>
-        <button class="filt">Применить</button>
-        <button class="create" hidden="true">Добавить новость</button>
+
+<div class="right-column">
+    <div class = "filter">
+            <p class="string"><span class="strong">Фильтр</span> поможет вам:</p>
+            <input class="in1" type="text" placeholder="Имя Автора">
+            <input class="in2"  type="date">
+            <input class="in3" type="date">
+            <button class = "filt">Применить</button>
     </div>
 </div>
-<p id="c2"></p>
-<button id="next">Ещё</button>
-<footer class="foot">
-    <p>LightNews, 21.02.2017<br>
+
+<div class="news" id="-1">
+    <h3 class="hat"></h3>
+    <button class="edit">Править</button>
+    <button class="delete">Удалить</button>
+    <p class="cleaner"></p>
+    <p class="time-date"></p>
+    <p class="written-by"></p>
+    <p class="plot"></p>
+    <p class="back-to-main">На главную</p>
+</div>
+
+<div class="add-edit">
+    <h3 class="form-name">Редактирование страницы</h3>
+    <p class="before-name">Заглавие:</p>
+    <input class="in-name" maxlength="100" placeholder="не более 100 символов">
+    <p class="must">*</p>
+    <p class="cleaner"></p>
+    <p class="before-summary">Описание:</p>
+    <input class="in-summary" maxlength="200" placeholder="не более 200 символов">
+    <p class="must">*</p>
+    <p class="cleaner"></p>
+    <p class="before-content">Текст:</p>
+    <textarea class="in-content" placeholder="текст новости"></textarea>
+    <p class="must">*</p>
+    <p class="cleaner"></p>
+    <p class="id-article">ID:</p>
+    <p class="name-id-article"></p>
+    <p class="cleaner"></p>
+    <p class="who-wrote">Автор:</p>
+    <p class="name-who-wrote"></p>
+    <p class="cleaner"></p>
+    <p class="date-write">Дата:</p>
+    <p class="name-date-write"></p>
+    <p class="cleaner"></p>
+    <p class="info">*-поля обязательны для заполнения</p>
+    <button class = "save">Сохранить</button>
+    <p class="back-to-main">На главную</p>
+</div>
+
+<div class="error">
+    <p><p class="warning">Ошибка!</p>Проверьте корректность введённых данных и повторите попытку.</p>
+    <p class="back-to-main">На главную</p>
+</div>
+
+<div class="authorization">
+    <p class="log-in">Авторизация</p>
+    <p class="before">Логин:</p>
+    <input class="user-name" placeholder="Логин">
+    <p class="before">Пароль:</p>
+    <input class="password" type="password" placeholder="Пароль">
+    <p class="cleaner"></p>
+    <button class="authorize">Войти</button>
+    <p class="back-to-main">На главную</p>
+</div>
+
+<button class="show-more">Показать ещё</button>
+
+<footer id = "foot">
+    <p>LightNews, 20.03.2017<br>
         MaryRGB@почта<br>
         MaryRGB, 2 курс</p>
 </footer>
+<script src="jscript.js"></script>
 </body>
 </html>
