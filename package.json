@@ -1,0 +1,22 @@
+{
+  "name": "site",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MaryRGB/PracticeProject.git"
+  },
+  "author": "MaryRGB",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MaryRGB/PracticeProject/issues"
+  },
+  "homepage": "https://github.com/MaryRGB/PracticeProject#readme",
+  "dependencies": {
+    "express": "^4.15.2"
+  }
+}
