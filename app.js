@@ -1,7 +1,9 @@
 ﻿var express = require('express');
-var ap = express();
-ap.use(express.static('public'));
-ap.get('/index', function(req, re){
+var app = express();
+app.use(express.static('public'));
+app.get('/', function(req, res){
     res.send('Hello');
 });
-ap.listen(3000);
+app.listen(3000, function(){
+    console.log('App started');
+});
