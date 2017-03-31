@@ -715,7 +715,7 @@ function handleSign(event){   //Обработка кнопки вход
 }
 
 bodyNode.addEventListener('click',handleSignIN);
-function handleSignIN(){   //Попытка авторизации
+function handleSignIN(event){   //Попытка авторизации
     var target = event.target;
     if(target.textContent ==="Войти") {
         var person = {
