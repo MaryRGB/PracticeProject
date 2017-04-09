@@ -1,0 +1,68 @@
+.left-column{
+    display: inline-block;
+    float: left;
+    margin: 0 0 0 2%;
+    width: 75%;
+}
+.article {
+    float: left;
+    display: block;
+    width: 42%;
+    height: 15em;
+    overflow: auto;
+    text-align: left;
+    margin: 1vw 1vw 2vw 3vw;
+    box-shadow: 0 0 0.5vw #005600;
+    border-radius: 0.4vw;
+    background-color: white;
+}
+a{
+    text-decoration: none;
+}
+.article:hover{
+    box-shadow: 0 0 1vw black;
+    cursor: pointer;
+}
+.title{
+    clear: both;
+    display: block;
+    margin: 0.5vw 0.5vw 0 0.5vw;
+    color: black;
+    word-break: normal;
+    overflow: hidden;
+}
+.title:hover{
+    text-decoration: underline;
+}
+.tag{
+    display: block;
+    word-break: normal;
+    word-wrap: break-word;
+    color: gray;
+    margin: 1% 3% 1% 3%;
+}
+.time{
+    display: block;
+    float: left;
+    color: gray;
+    margin: 0.1% 2% 0 3%;
+}
+.summary{
+    display: table-row;
+    color: black;
+    margin: 0;
+    word-break: normal;
+}
+.date{
+    float: left;
+    display: block;
+    color: black;
+    margin: 1% 3% 0 3%;
+}
+.author{
+    float: right;
+    color: black;
+    word-break: normal;
+    text-align: right;
+    margin: 1% 3% 0 3%;
+}

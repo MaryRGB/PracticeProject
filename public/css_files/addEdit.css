@@ -1,0 +1,91 @@
+.add-edit{
+    width: 100%;
+    display: none;
+    word-wrap: normal;
+    text-align: center;
+    margin: 0 auto;
+}
+.must{
+    display: inline-block;
+    font-size: 1em;
+}
+.form-name{
+    font-size: 2.4em;
+    margin:0;
+}
+.before-name{
+    display: inline-block;
+    font-size: 1.2em;
+    margin: 0 0.4em 0 0.5em;
+}
+.in-name {
+    display: inline-block;
+    font-size: 1em;
+    width:40%;
+}
+.before-summary{
+    display: inline-block;
+    font-size: 1.2em;
+    margin: 0 0.4em 0 0;
+}
+.in-summary {
+    display: inline-block;
+    font-size: 1em;
+    width:40%;
+    margin: 0;
+}
+.before-content{
+    display: inline-block;
+    font-size: 1.2em;
+    margin: 0 0.4em 0 1.9em;
+}
+.in-content {
+    display: inline-block;
+    font-size: 1.4em;
+    width:40%;
+    height: 10em;
+}
+.before-link{
+    display: none;
+    font-size: 1.2em;
+    margin: 0;
+}
+.link {
+    display: none;
+    font-size: 1em;
+    width:40%;
+    margin-left: 1em;
+}
+.info{
+    display: block;
+    font-size: 0.8em;
+}
+.save{
+    display: inline-block;
+    font-size: 1.2em;
+    cursor: pointer;
+}
+.id-article{
+    display: inline-block;
+    margin: 0 0 1em 0;
+}
+.name-id-article{
+    display: inline-block;
+    margin:0;
+}
+.who-wrote{
+    display: inline-block;
+    margin: 0 0 1em 0;
+}
+.name-who-wrote{
+    display: inline-block;
+    margin: 0;
+}
+.date-write{
+    display: inline-block;
+    margin: 0;
+}
+.name-date-write{
+    display: inline-block;
+    margin: 0;
+}

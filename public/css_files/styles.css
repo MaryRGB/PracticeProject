@@ -1,0 +1,71 @@
+html{
+    background-color: rgba(87, 246, 22, 0.22);
+    min-width: 400px;
+    min-height: 100%;
+}
+body{
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-width: 100%;
+    min-height: 100%;
+    font-size: 100%;
+}
+.show-more{
+    clear: both;
+    display: block;
+    margin: 1em auto;
+    box-shadow: inset 0 0 0.5vw #c9c9c9;
+}
+.show-more:hover{
+    cursor: pointer;
+    background-color: #c9c9c9;
+}
+/*Ошибка*/
+.error{
+    display: none;
+    width: 100%;
+    height: 100%;
+    word-wrap: normal;
+    text-align: center;
+    margin: 0 auto;
+}
+.warning{
+    color: red;
+    margin: 0;
+    font-size: 3em;
+}
+.back-to-main{
+    color: blue;
+}
+.back-to-main:hover{
+    text-decoration: underline;
+    cursor: pointer;
+    padding:0;
+}
+/*Авторизация*/
+.authorization{
+    display:none;
+    width: 100%;
+    word-wrap: normal;
+    text-align: center;
+    margin: 0 auto;
+}
+.log-in{
+    font-size: 2.6em;
+    margin: 0;
+}
+.before{
+    font-size: 1.2em;
+    margin: 1em  0;
+}
+.user-name, .password{
+    font-size: 1em;
+    width:20%;
+    margin: 0;
+}
+.authorize{
+    font-size: 1.4em;
+    margin: 1em 0;
+    cursor: pointer;
+}

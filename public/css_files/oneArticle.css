@@ -1,0 +1,49 @@
+.news{
+    display: none;
+    width: 100%;
+    position: relative;
+    word-wrap: normal;
+    text-align: center;
+    margin: 0 auto;
+}
+.hat{
+    font-size: 1.9em;
+    word-break: normal;
+    margin-top: 1em;
+    margin-bottom: 0.2em;
+}
+.edit{
+    display:none;
+    width: auto;
+    height: 2em;
+    margin-bottom: 0.5em;
+    margin-right: 1em;
+    cursor: pointer;
+}
+.delete{
+    display:none;
+    width: auto;
+    height: 2em;
+    margin-bottom: 0.5em;
+    padding: 0;
+    cursor: pointer;
+}
+.time-date{
+    display: inline-block;
+    color: gray;
+    margin: 0 0 1em 0;
+    font-size: 1em;
+}
+.written-by{
+    display: inline-block;
+    color: gray;
+    margin: 0 0 1em 0;
+    font-size: 1em;
+}
+.plot{
+    display: block;
+    font-size: 1.1em;
+    word-break: normal;
+    text-align: center;
+    margin:  0 20%;
+}

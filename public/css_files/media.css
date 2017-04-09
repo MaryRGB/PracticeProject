@@ -1,0 +1,99 @@
+@media only screen and (min-width: 680px) and (max-width: 900px){
+    #head{
+        height: 3.6em;
+    }
+    #logo{
+        height: 3.6em;
+        margin-left: 2.5em;
+    }
+    #sitename{
+        font-size: 2.5em;
+        margin-top: 0.15em;
+        margin-left:0.25em;
+    }
+    #sign{
+        font-size: 0.8em;
+        width: 3.8em;
+        margin-top: 1.6em;
+        margin-right: 3em;
+    }
+    .create{
+        width: 2.5em;
+        height: 2.5em;
+        margin-top: 1em;
+        margin-right: 2em;
+    }
+    .add{
+        font-size: 2.6em;
+        line-height: 0.95em;
+    }
+    #user{
+        font-size: 1.2em;
+        margin-top: 1em;
+        margin-right: 1.2em;
+    }
+    .filt{
+        font-size: 0.8em;
+    }
+}
+@media only screen and (max-width: 680px){
+    #head{
+        height: 2.8em;
+    }
+    #logo{
+        height: 2.8em;
+        margin-left: 0;
+    }
+    #sitename{
+        font-size: 1.5em;
+        margin-top: 0.3em;
+        margin-left:0.25em;
+    }
+    #sign{
+        font-size: 0.6em;
+        width: 3.6em;
+        margin-top: 1.6em;
+        margin-right: 0.1em;
+    }
+    .create{
+        width: 2em;
+        height: 2em;
+        margin-top: 0.7em;
+        margin-right: 0.8em;
+    }
+    .add{
+        font-size: 2em;
+        line-height: 0.95em;
+    }
+    #user{
+        font-size: 1em;
+        margin-top: 0.8em;
+        margin-right: 0.8em;
+    }
+    .picture{
+        max-height: 13em;
+    }
+    .hat{
+        font-size: 1.6em;
+        word-break: normal;
+        margin-top: 0.5em;
+        margin-bottom: 0.4em;
+    }
+    .plot{
+        margin: 0 2%;
+    }
+    .filt{
+        font-size: 0.6em;
+    }
+}
+@media only screen and (max-width: 780px){
+    .article{
+        float: none;
+        width: 80%;
+        margin-left: 6.5vw;
+        height: 13em;
+    }
+    .user-name, .password{
+        width:12em;
+    }
+}

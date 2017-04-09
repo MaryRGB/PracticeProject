@@ -1,0 +1,42 @@
+.right-column{
+    display: inline-block;
+    margin: 0;
+    width: 23%;
+}
+.filter{
+    display: block;
+    width: 80%;
+    height: auto;
+    text-align: center;
+    box-shadow: 0 0 0.5vw #005600;
+    border-radius: 0.4em;
+    background-color: white;
+}
+.strong{
+    font-weight: bold;
+}
+.in1{
+    width: 88%;
+    margin-bottom: 0.7vw;
+}
+.in2{
+    width: 88%;
+    margin-bottom: 0.7vw;
+}
+.in3{
+    width: 88%;
+    margin-bottom: 1.2vw;
+}
+.filt{
+    display: block;
+    width: 32%;
+    background-color: whitesmoke;
+    margin-left:32%;
+    word-wrap: break-word;
+    box-shadow: inset 0 0 0.5vw #c9c9c9;
+    padding: 0;
+}
+.filt:hover{
+    cursor: pointer;
+    background-color: #c9c9c9;
+}

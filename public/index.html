@@ -4,7 +4,13 @@
     <meta charset="utf-8">
     <meta name = "viewport" content="width=device-width, initial-scale=1.0" >
     <title>LightNews</title>
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="css_files/styles.css" />
+    <link rel="stylesheet" href="css_files/articles.css" />
+    <link rel="stylesheet" href="css_files/filter.css" />
+    <link rel="stylesheet" href="css_files/header_footer.css" />
+    <link rel="stylesheet" href="css_files/oneArticle.css" />
+    <link rel="stylesheet" href="css_files/addEdit.css" />
+    <link rel="stylesheet" href="css_files/media.css" />
 </head>
 <body>
 <header id = "head">
@@ -34,11 +40,11 @@
 
 <div class="right-column">
     <div class = "filter">
-            <p class="string"><span class="strong">Фильтр</span> поможет вам:</p>
-            <input class="in1" type="text" placeholder="Имя Автора">
-            <input class="in2"  type="date">
-            <input class="in3" type="date">
-            <button class = "filt">Применить</button>
+        <p class="string"><span class="strong">Фильтр</span> поможет вам:</p>
+        <input class="in1" type="text" placeholder="Имя Автора">
+        <input class="in2"  type="date">
+        <input class="in3" type="date">
+        <button class = "filt">Применить</button>
     </div>
 </div>
 
@@ -82,7 +88,7 @@
 </div>
 
 <div class="error">
-    <p><p class="warning">Ошибка!</p>Проверьте корректность введённых данных и повторите попытку.</p>
+    <p ><p class="warning">Ошибка!</p>Проверьте корректность введённых данных и повторите попытку.</p>
     <p class="back-to-main">На главную</p>
 </div>
 
@@ -104,6 +110,8 @@
         MaryRGB@почта<br>
         MaryRGB, 2 курс</p>
 </footer>
-<script src="jscript.js"></script>
+<script src="js_files/article-model.js"></script>
+<script src="js_files/DOM.js"></script>
+<script src="js_files/events.js"></script>
 </body>
 </html>
