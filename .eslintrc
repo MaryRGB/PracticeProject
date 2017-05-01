@@ -2,6 +2,8 @@
     "extends": "airbnb-base",
     "rules":{
         "func-names": ["error", "never"],
-        "indent": 0
+        "indent": "off",
+        "linebreak-style": "off",
+        "prefer-arrow-callback": "off"
     }
 }

@@ -1,128 +1,149 @@
 'use strict';
 
 document.addEventListener('DOMContentLoaded', startApp);
-function displayArticles(skip, top, filterConfig) {
-    skip = skip || 0;
-    top = top || 6;
-
-    visualizer.insertArticlesInDOM(articleModel.getArticles(skip, top, filterConfig));
+function displayArticles(articles) {
+    visualizer.insertArticlesInDOM(articles);
 }
+function getAmount() {
+    let howMany;
+    const oReq = new XMLHttpRequest();
+    function cleanUp() {
+        oReq.removeEventListener('load', handler);
+    }
+    function handler() {
+        howMany = Number(JSON.parse(this.responseText));
+        cleanUp();
+    }
+    oReq.addEventListener('load', handler);
+    oReq.open('GET','/amount');
+    oReq.send();
+    return howMany;
+}
+
 function startApp() {
-    if (!localStorage.getItem('articles')) {
-        var articlesString = JSON.stringify(articleModel.getForStorage());
-        localStorage.setItem('articles', articlesString);
-    } else {
-        var articleString2 = localStorage.getItem('articles');
-        articleModel.setFromStorage(JSON.parse(articleString2, function(key, value) {
+    const amount = getAmount();
+    const filterConfig = filter.init(renderArticlesWithFilterConfig);
+    const params = 'author=' + encodeURIComponent(filterConfig.author)
+        + '&upTo=' + encodeURIComponent(filterConfig.upTo) + '&from=' + encodeURIComponent(filterConfig.from);
+    const oReq = new XMLHttpRequest();
+    function handler() {
+        const tempArticles = JSON.parse(this.responseText, function (key, value) {
             if (key === 'createdAt') {
                 return new Date(value);
             }
             return value;
-        }));
-    }
-    visualizer.init();
-
-    var filterConfig = filter.init(renderArticlesWithFilterConfig);
-    renderArticlesWithFilterConfig(filterConfig);
-
-    function renderArticlesWithFilterConfig(filterConf) {
+        });
+        visualizer.init();
         visualizer.clearDOM();
-        var showMoreParams = showMore.init(articleModel.getArticleAmount(filterConf),
-            displayArticles);
-        displayArticles(showMoreParams.skip, showMoreParams.top, filterConf);
+        renderArticlesWithFilterConfig();
+        displayArticles(tempArticles);
+        cleanUp();
+    }
+    function cleanUp() {
+        oReq.removeEventListener('load', handler);
+    }
+    oReq.addEventListener('load', handler);
+    oReq.open('GET', '/articles?' + params);
+    oReq.send();
+
+    function renderArticlesWithFilterConfig() {
+        showMore.init(amount, displayArticles);
     }
 }
-function removeArticle(id) {
-    if (visualizer.removeArticle(id)) {
-        return true;
-    }
-    return false;
-}
+
 function userChange(name) {
     visualizer.changeUser(name);
 }
-function openArticle(id) {
+function openArticle(article, id) {
     document.querySelector('.left-column').style = 'display:none;';
     document.querySelector('.right-column').style = 'display:none;';
     document.querySelector('.show-more').style = 'display:none;';
-    visualizer.openArt(id);
+    visualizer.openArt(article, id);
     document.querySelector('.news').style = 'display:block;';
 }
 
 function formToAE(type, id) {
-    if (type === 'edit') {
+    let article;
+    function handler() {
+        article = JSON.parse(this.responseText, function (key, value) {
+            if (key === 'createdAt') {
+                return new Date(value);
+            }
+            return value;
+        });
         document.querySelector('.news').style = 'display:none;';
-        visualizer.displayAE(id);
-        document.querySelector('.add-edit').style='display:block;';
+        visualizer.displayAE(article);
+        document.querySelector('.add-edit').style = 'display:block;';
+        cleanUp();
+    }
+    function cleanUp() {
+        oReq.removeEventListener('load', handler);
+    }
+    const oReq = new XMLHttpRequest();
+    if (type === 'edit') {
+        oReq.addEventListener('load', handler);
+        oReq.open('GET', '/articles/edit/' + id);
+        oReq.send();
     } else {
         document.querySelector('.news').style = 'display:none;';
         document.querySelector('.left-column').style = 'display:none;';
         document.querySelector('.right-column').style = 'display:none;';
         document.querySelector('.show-more').style = 'display:none;';
         document.querySelector('.error').style = 'display:none;';
-        visualizer.displayAE(id);
+        visualizer.displayAE(article);
         document.querySelector('.add-edit').style = 'display:block;';
     }
 }
-function saveEveryThing(newArticle){
-    if (newArticle.id) {
-        if (!visualizer.editArticle(newArticle)) {
-            document.querySelector('.add-edit').style = 'display:none;';
-            showError();
-            return false;
-        }
-    } else if (!articleModel.addArticle(newArticle)) {
-        document.querySelector('.add-edit').style = 'display:none;';
-        showError();
-        return false;
-    }
-    return true;
-}
 function showError() {
     document.querySelector('.error').style = 'display:block;';
-    visualizer.clearDOM();
-    filter.reset();
-    var showMoreParams = showMore.reset();
-    displayArticles(showMoreParams.skip, showMoreParams.top);
+    resetFiltPag();
     document.querySelector('.show-more').style = 'display:none;';
 }
 
-var articleListNode = document.querySelector('.left-column');
+const articleListNode = document.querySelector('.left-column');
 articleListNode.addEventListener('click', handleOpen);
 
 function handleOpen(event) {
-    var articleString2 = localStorage.getItem('articles');
-    articleModel.setFromStorage(JSON.parse(articleString2, function(key, value) {
-        if (key === 'createdAt') {
-            return new Date(value);
-        }
-        return value;
-    }));
-    var target = event.target;
+    const oReq = new XMLHttpRequest();
+    function cleanUp() {
+        oReq.removeEventListener('load', handler);
+    }
+    function handler() {
+        let oneArticle = JSON.parse(this.responseText);
+        oneArticle.createdAt = new Date(oneArticle.createdAt);
+        openArticle(oneArticle, target.getAttribute('id'));
+        cleanUp();
+    }
+
+    let target = event.target;
     while (target.getAttribute('class') !== 'article') {
         target = target.parentNode;
     }
     if (target.getAttribute('class') === 'article') {
-        openArticle(target.getAttribute('id'));
+        const string = '/articles/' + target.getAttribute('id');
+        oReq.addEventListener('load', handler);
+        oReq.open('GET', string);
+        oReq.send();
     }
 }
 
-var bodyNode = document.querySelector('body');
+const bodyNode = document.querySelector('body');
 bodyNode.addEventListener('click', handleBack);
 bodyNode.addEventListener('click', handleDelete);
 bodyNode.addEventListener('click', handleAddEdit);
 bodyNode.addEventListener('click', handleSave);
 
 function handleBack(event) {
-    var articleString2 = localStorage.getItem('articles');
-    articleModel.setFromStorage(JSON.parse(articleString2, function(key, value) {
-        if (key === 'createdAt') {
-            return new Date(value);
-        }
-        return value;
-    }));
-    var target = event.target;
-    if (target.getAttribute('class') === 'back-to-main') {
+    const oReq = new XMLHttpRequest();
+    function handler() {
+        const tempArticles = JSON.parse(this.responseText, function (key, value) {
+            if (key === 'createdAt') {
+                return new Date(value);
+            }
+            return value;
+        });
+        visualizer.clearDOM();
+        displayArticles(tempArticles);
         document.querySelector('.left-column').style = 'display:inline-block;';
         document.querySelector('.right-column').style = 'display:inline-block;';
         document.querySelector('.show-more').style = 'display:block;';
@@ -130,85 +151,89 @@ function handleBack(event) {
         document.querySelector('.add-edit').style = 'display:none;';
         document.querySelector('.error').style = 'display:none;';
         document.querySelector('.authorization').style = 'display:none;';
+        cleanUp();
     }
-}
+    function cleanUp() {
+        oReq.removeEventListener('load', handler);
+    }
+
+    const target = event.target;
+    if (target.getAttribute('class') === 'back-to-main') {
+        oReq.addEventListener('load', handler);
+        oReq.open('GET','/articles');
+        oReq.send();
+    }
+ }
 function handleDelete(event) {
-    var target = event.target;
+    const target = event.target;
     if (target.getAttribute('class') === 'delete') {
         if (confirm('Вы действийтельно хотите удалить эту новость?')) {
-            var articleString2 = localStorage.getItem('articles');
-            articleModel.setFromStorage(JSON.parse(articleString2, function(key, value) {
-                if (key === 'createdAt') {
-                    return new Date(value);
-                }
-                return value;
-            }));
+            const oReq = new XMLHttpRequest();
+            oReq.open('DELETE', '/articles/' + target.parentNode.getAttribute('id'));
+            oReq.send();
 
-            removeArticle(target.parentNode.getAttribute('id'));
-            visualizer.clearDOM();
-            filter.reset();
-            var showMoreParams = showMore.reset();
-            displayArticles(showMoreParams.skip, showMoreParams.top);
+            displayResetFiltPag();
             document.querySelector('.news').style = 'display:none;';
             document.querySelector('.left-column').style = 'display:inline-block;';
             document.querySelector('.right-column').style = 'display:inline-block;';
-
-            var articlesString1 = JSON.stringify(articleModel.getForStorage());
-            localStorage.setItem('articles', articlesString1);
         }
     }
 }
 function handleAddEdit(event) {
-    var articleString2 = localStorage.getItem('articles');
-    articleModel.setFromStorage(JSON.parse(articleString2, function(key, value) {
-        if (key === 'createdAt') {
-            return new Date(value);
-        }
-        return value;
-    }));
-    var target = event.target;
+    const target = event.target;
     if (target.getAttribute('class') === 'edit'
         || target.getAttribute('class') === 'create' || target.getAttribute('class') === 'add') {
         formToAE(target.getAttribute('class'), target.parentNode.getAttribute('id'));
     }
 }
 function handleSave(event) {
-    var target = event.target;
-    var parent = target.parentNode;
-    if (target.getAttribute('class') === 'save'){
-        var articleString2 = localStorage.getItem('articles');
-        articleModel.setFromStorage(JSON.parse(articleString2, function(key, value) {
+    const target = event.target;
+    const parent = target.parentNode;
+    const oReq = new XMLHttpRequest();
+    function handler() {
+        const tempArticle = JSON.parse(this.responseText, function (key, value) {
             if (key === 'createdAt') {
                 return new Date(value);
             }
             return value;
-        }));
-        var newArticle = {
+        });
+        if (tempArticle.oops == false) {
+            document.querySelector('.add-edit').style = 'display:none;';
+            openArticle(tempArticle, tempArticle.id);
+        } else {
+            document.querySelector('.add-edit').style = 'display:none;';
+            showError();
+        }
+        cleanUp();
+    }
+    function cleanUp() {
+        oReq.removeEventListener('load', handler);
+    }
+    if (target.getAttribute('class') === 'save') {
+        oReq.addEventListener('load', handler);
+        oReq.open('PUT', '/articles/save');
+        oReq.setRequestHeader('content-type', 'application/json');
+        const newArticle = {
             title: parent.querySelector('.in-name').value,
             summary: parent.querySelector('.in-summary').value,
             content: parent.querySelector('.in-content').value,
             id: parent.querySelector('.name-id-article').textContent,
-            createdAt: parent.querySelector('.name-date-write').textContent,
+            createdAt: new Date(parent.querySelector('.name-date-write').textContent),
             author: parent.querySelector('.name-who-wrote').textContent,
+            exist: true,
         };
-        if (saveEveryThing(newArticle)) {
-            document.querySelector('.add-edit').style = 'display:none;';
-            visualizer.clearDOM();
-            filter.reset();
-            var showMoreParams = showMore.reset();
-            displayArticles(showMoreParams.skip, showMoreParams.top);
-            openArticle(newArticle.id);
-        }
-        var articlesString1 = JSON.stringify(articleModel.getForStorage());
-        localStorage.setItem('articles', articlesString1);
+        const body = JSON.stringify(newArticle);
+        oReq.send(body);
+
+        resetFiltPag();
     }
 }
 
-var headNode = document.querySelector('#head');
+const headNode = document.querySelector('#head');
 headNode.addEventListener('click', handleSign);
 
 function handleSign(event) {
-    var target = event.target;
+    const target = event.target;
     if (target.textContent === 'Вход') {
         document.querySelector('.authorization').style = 'display:block;';
         document.querySelector('.left-column').style = 'display:none;';
@@ -219,32 +244,25 @@ function handleSign(event) {
         visualizer.clearSign();
     }
     if (target.textContent === 'Выход') {
+        displayResetFiltPag();
+        userChange();
         document.querySelector('.left-column').style = 'display:inline-block;';
         document.querySelector('.right-column').style = 'display:inline-block;';
         document.querySelector('.news').style = 'display:none;';
         document.querySelector('.authorization').style = 'display:none;';
-        visualizer.clearDOM();
-        filter.reset();
-        var showMoreParams = showMore.reset();
-        displayArticles(showMoreParams.skip, showMoreParams.top);
-        userChange();
+        document.querySelector('.add-edit').style = 'display:none;';
     }
 }
 
 bodyNode.addEventListener('click', handleSignIN);
 function handleSignIN(event) {
-    var target = event.target;
-    if (target.textContent === 'Войти') {
-        var person = {
-            login: target.parentNode.querySelector('.user-name').value,
-            password: target.parentNode.querySelector('.password').value
-        };
-        if (articleModel.findUser(person)) {
+    let person;
+    const target = event.target;
+    const oReq = new XMLHttpRequest();
+    function handler() {
+        if (this.responseText) {
             userChange(person.login);
-            visualizer.clearDOM();
-            filter.reset();
-            var showMoreParams = showMore.reset();
-            displayArticles(showMoreParams.skip, showMoreParams.top);
+            displayResetFiltPag();
             document.querySelector('.left-column').style = 'display:inline-block;';
             document.querySelector('.right-column').style = 'display:inline-block;';
             document.querySelector('.authorization').style = 'display:none;';
@@ -252,15 +270,29 @@ function handleSignIN(event) {
             document.querySelector('.authorization').style = 'display:none;';
             showError();
         }
+        cleanUp();
+    }
+    function cleanUp() {
+        oReq.removeEventListener('load', handler);
+    }
+    if (target.textContent === 'Войти') {
+        person = {
+            login: target.parentNode.querySelector('.user-name').value,
+            password: target.parentNode.querySelector('.password').value
+        };
+        const params = 'login=' + encodeURIComponent(person.login) + '&password=' + encodeURIComponent(person.password);
+        oReq.addEventListener('load', handler);
+        oReq.open('GET', '/signIn?' + params);
+        oReq.send();
     }
 }
 
-var showMore = (function () {
-    var total;
-    var PER_PAGE = 6;
-    var currentPage = 1;
-    var PAGINATION_BUTTON;
-    var callBack;
+const showMore = (function () {
+    let total;
+    const PER_PAGE = 6;
+    let currentPage = 1;
+    let PAGINATION_BUTTON;
+    let callBack;
 
     PAGINATION_BUTTON = document.querySelector('.show-more');
     PAGINATION_BUTTON.addEventListener('click', handleShowMoreClick);
@@ -270,18 +302,34 @@ var showMore = (function () {
         total = amount;
         callBack = CB;
         hideShowPagination();
-        return getParams();
     }
     function handleShowMoreClick(event) {
+        const oReq = new XMLHttpRequest();
+        function handler() {
+            const tempArticles = JSON.parse(this.responseText, function (key, value) {
+                if (key === 'createdAt') {
+                    return new Date(value);
+                }
+                return value;
+            });
+            callBack(tempArticles);
+            cleanUp();
+        }
+        function cleanUp() {
+            oReq.removeEventListener('load', handler);
+        }
         if (event.target.getAttribute('class') === 'show-more') {
-            var paginationParams = nextPage();
-            callBack(paginationParams.skip, paginationParams.top);
+            const paginationParams = nextPage();
+            const params = 'top=' + encodeURIComponent(paginationParams.top) + '&skip=' + encodeURIComponent(paginationParams.skip);
+            oReq.addEventListener('load', handler);
+            oReq.open('GET', '/articles?' + params);
+            oReq.send();
         }
     }
     function getParams() {
         return {
             top: PER_PAGE,
-            skip: (currentPage - 1) * PER_PAGE
+            skip: (currentPage - 1) * PER_PAGE,
         };
     }
     function getCurrentTotal() {
@@ -305,15 +353,15 @@ var showMore = (function () {
         return getParams();
     }
     return {
-        init: init,
-        reset: reset
+        init,
+        reset,
     };
 }());
 
-var filter = (function () {
-    var FORM;
-    var FILT_BUTTON;
-    var filterCallBack;
+const filter = (function () {
+    let FORM;
+    let FILT_BUTTON;
+    let filterCallBack;
     FORM = document.querySelector('.filter');
     FILT_BUTTON = document.querySelector('.filt');
     FILT_BUTTON.addEventListener('click', handleFiltClick);
@@ -323,9 +371,9 @@ var filter = (function () {
         return getFilter();
     }
     function getFilter() {
-        var authorSelect = FORM.querySelector('.in1').value;
-        var fromSelect = FORM.querySelector('.in2').value;
-        var upTOSelect = FORM.querySelector('.in3').value;
+        const authorSelect = FORM.querySelector('.in1').value;
+        const fromSelect = FORM.querySelector('.in2').value;
+        const upTOSelect = FORM.querySelector('.in3').value;
 
         return {
             author: authorSelect,
@@ -334,19 +382,80 @@ var filter = (function () {
         };
     }
     function handleFiltClick(event) {
-        return filterCallBack(getFilter());
+        function handler() {
+            const tempArticles = JSON.parse(this.responseText, function (key, value) {
+                if (key === 'createdAt') {
+                    return new Date(value);
+                }
+                return value;
+            });
+            visualizer.clearDOM();
+            filterCallBack(tempArticles);
+            displayArticles(tempArticles);
+            cleanUp();
+        }
+        function cleanUp() {
+            oReq.removeEventListener('load', handler);
+        }
+        const filterParams = getFilter();
+        const params = 'author=' + encodeURIComponent(filterParams.author)
+            + '&upTo=' + encodeURIComponent(filterParams.upTo) + '&from=' + encodeURIComponent(filterParams.from);
+        let oReq = new XMLHttpRequest();
+        oReq.addEventListener('load', handler);
+        oReq.open('GET', '/articles?' + params);
+        oReq.send();
     }
     function reset() {
-        articleModel.getArticleAmount(
-            {
-                author: FORM.querySelector('.in1').value = '',
-                from: FORM.querySelector('.in2').value = '',
-                upTo: FORM.querySelector('.in3').value = '',
-            });
+        const fill = {
+            author: FORM.querySelector('.in1').value = '',
+            from: FORM.querySelector('.in2').value = '',
+            upTo: FORM.querySelector('.in3').value = '',
+        };
+        return fill;
     }
     return {
-        init: init,
-        getFilterConfig: getFilter(),
-        reset: reset,
+        init,
+        reset,
     };
 }());
+
+function displayResetFiltPag() {
+    const filterParams = filter.reset();
+    const showMoreParams = showMore.reset();
+    const params = 'author=' + encodeURIComponent(filterParams.author)
+        + '&upTo=' + encodeURIComponent(filterParams.upTo) + '&from=' + encodeURIComponent(filterParams.from)
+        + '&top=' + encodeURIComponent(showMoreParams.top) + '&skip=' + encodeURIComponent(showMoreParams.skip);
+    const oReq = new XMLHttpRequest();
+    function handler() {
+        const tempArticles = JSON.parse(this.responseText, function (key, value) {
+            if (key === 'createdAt') {
+                return new Date(value);
+            }
+            return value;
+        });
+        visualizer.clearDOM();
+        displayArticles(tempArticles);
+        cleanUp();
+    }
+    function cleanUp() {
+        oReq.removeEventListener('load', handler);
+    }
+    oReq.addEventListener('load', handler);
+    oReq.open('GET', '/articles?' + params);
+    oReq.send();
+}
+
+function resetFiltPag() {
+    const filterParams = filter.reset();
+    showMore.reset();
+    const oReq = new XMLHttpRequest();
+    const params = {
+        author: filterParams.author,
+        upTo: filterParams.upTo,
+        from: filterParams.from,
+    };
+    const body = JSON.stringify(params);
+    oReq.open('PUT', '/articles/filter');
+    oReq.setRequestHeader('content-type', 'application/json');
+    oReq.send(body);
+}

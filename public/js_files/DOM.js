@@ -1,9 +1,9 @@
 'use strict';
 
-var visualizer = (function () {
-    var ARTICLE_TEMPLATE;
-    var listOfArticles;
-    var USER = null;
+const visualizer = (function () {
+    let ARTICLE_TEMPLATE;
+    let listOfArticles;
+    let USER = null;
 
     function init() {
         ARTICLE_TEMPLATE = document.querySelector('#template-article');
@@ -20,7 +20,7 @@ var visualizer = (function () {
         '.' + ((data.getMonth() <= 8) ? ('0' + (data.getMonth() + 1)) : (data.getMonth() + 1)) + '.' + data.getFullYear());
     }
     function visualizeArticle(article) {
-        var temp = ARTICLE_TEMPLATE;
+        let temp = ARTICLE_TEMPLATE;
         temp.content.querySelector('.article').id = article.id;
         temp.content.querySelector('.title').textContent = article.title;
         temp.content.querySelector('.time').textContent = formatTime(article.createdAt);
@@ -37,7 +37,7 @@ var visualizer = (function () {
     }
 
     function insertArticlesInDOM(news) {
-        var listNodes = visualizeAll(news);
+        let listNodes = visualizeAll(news);
         listNodes.forEach(function (node) {
             listOfArticles.appendChild(node);
         });
@@ -46,42 +46,30 @@ var visualizer = (function () {
         listOfArticles.innerHTML = '';
     }
     function insertArticle(article) {
-        if (articleModel.addArticle(article)) {
-            listOfArticles.insertBefore(visualizeArticle(article), listOfArticles.firstChild);
-            return true;
-        }
-        return false;
+        listOfArticles.insertBefore(visualizeArticle(article), listOfArticles.firstChild);
     }
     function editArticle(id, article) {
-        var q;
-        if (articleModel.editArticle(id, article)) {
-            q = document.getElementById(id);
-            if (q) {
-                q.querySelector('.title').textContent = article.title;
-                q.querySelector('.summary').textContent = article.summary;
-                q.querySelector('.plot').textContent = article.content;
-            }
-            return true;
+        let q;
+        q = document.getElementById(id);
+        if (q) {
+            q.querySelector('.title').textContent = article.title;
+            q.querySelector('.summary').textContent = article.summary;
+            q.querySelector('.plot').textContent = article.content;
         }
-        return false;
     }
     function removeArticle(id) {
-        var a;
-        var b;
-        if (articleModel.removeArticle(id) === true) {
-            a = document.getElementById(id);
-            if (a) {
-                b = a.parentNode;
-                if (b) {
-                    b.removeChild(a);
-                }
+        let a;
+        let b;
+        a = document.getElementById(id);
+        if (a) {
+            b = a.parentNode;
+            if (b) {
+                b.removeChild(a);
             }
-            return true;
         }
-        return false;
     }
     function changeUser(name) {
-        var you = document.querySelector('#user');
+        let you = document.querySelector('#user');
         USER = name;
         you.textContent = name;
         if (USER) {
@@ -99,19 +87,17 @@ var visualizer = (function () {
             document.querySelector('.edit').style = 'display: none;';
         }
     }
-    function openArt(id) {
-        var temporary = articleModel.getArticle(id);
-        var temp = document.querySelector('.news');
+    function openArt(temporary, id) {
+        let temp = document.querySelector('.news');
         temp.id = id;
         temp.querySelector('.hat').textContent = temporary.title;
         temp.querySelector('.time-date').textContent = formatDate(temporary.createdAt) + ' ' + formatTime(temporary.createdAt);
         temp.querySelector('.written-by').textContent = 'Автор: ' + temporary.author;
         temp.querySelector('.plot').textContent = temporary.content;
     }
-    function displayAE(id) {
-        var art;
-        var ae = document.querySelector('.add-edit');
-        if (art = articleModel.getArticle(id)) {
+    function displayAE(art) {
+        let ae = document.querySelector('.add-edit');
+        if (art) {
             ae.querySelector('.in-name').value = art.title;
             ae.querySelector('.in-summary').value = art.summary;
             ae.querySelector('.in-content').value = art.content;
@@ -128,20 +114,20 @@ var visualizer = (function () {
         }
     }
     function clearSign() {
-        var ae = document.querySelector('.authorization');
+        let ae = document.querySelector('.authorization');
         ae.querySelector('.user-name').value = '';
         ae.querySelector('.password').value = '';
     }
     return {
-        init: init,
-        insertArticlesInDOM: insertArticlesInDOM,
-        clearDOM: clearDOM,
-        insertArticle: insertArticle,
-        editArticle: editArticle,
-        removeArticle: removeArticle,
-        changeUser: changeUser,
-        openArt: openArt,
-        displayAE: displayAE,
-        clearSign: clearSign,
+        init,
+        insertArticlesInDOM,
+        clearDOM,
+        insertArticle,
+        editArticle,
+        removeArticle,
+        changeUser,
+        openArt,
+        displayAE,
+        clearSign,
     };
 }());
