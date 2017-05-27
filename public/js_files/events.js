@@ -4,25 +4,8 @@ document.addEventListener('DOMContentLoaded', startApp);
 function displayArticles(articles) {
     visualizer.insertArticlesInDOM(articles);
 }
-function getAmount() {
-    let howMany;
-    const oReq = new XMLHttpRequest();
-    function cleanUp() {
-        oReq.removeEventListener('load', handler);
-    }
-    function handler() {
-        howMany = Number(JSON.parse(this.responseText));
-        cleanUp();
-    }
-    oReq.addEventListener('load', handler);
-    oReq.open('GET','/amount');
-    oReq.send();
-    return howMany;
-}
-
 function startApp() {
-    const amount = getAmount();
-    const filterConfig = filter.init(renderArticlesWithFilterConfig);
+    const filterConfig = filter.getFilter();
     const params = 'author=' + encodeURIComponent(filterConfig.author)
         + '&upTo=' + encodeURIComponent(filterConfig.upTo) + '&from=' + encodeURIComponent(filterConfig.from);
     const oReq = new XMLHttpRequest();
@@ -35,7 +18,6 @@ function startApp() {
         });
         visualizer.init();
         visualizer.clearDOM();
-        renderArticlesWithFilterConfig();
         displayArticles(tempArticles);
         cleanUp();
     }
@@ -45,10 +27,7 @@ function startApp() {
     oReq.addEventListener('load', handler);
     oReq.open('GET', '/articles?' + params);
     oReq.send();
-
-    function renderArticlesWithFilterConfig() {
-        showMore.init(amount, displayArticles);
-    }
+    showMore.init(displayArticles);
 }
 
 function userChange(name) {
@@ -96,7 +75,6 @@ function formToAE(type, id) {
 }
 function showError() {
     document.querySelector('.error').style = 'display:block;';
-    resetFiltPag();
     document.querySelector('.show-more').style = 'display:none;';
 }
 
@@ -134,6 +112,9 @@ bodyNode.addEventListener('click', handleAddEdit);
 bodyNode.addEventListener('click', handleSave);
 
 function handleBack(event) {
+    const filterConfig = filter.getFilter();
+    const params = 'author=' + encodeURIComponent(filterConfig.author)
+        + '&upTo=' + encodeURIComponent(filterConfig.upTo) + '&from=' + encodeURIComponent(filterConfig.from);
     const oReq = new XMLHttpRequest();
     function handler() {
         const tempArticles = JSON.parse(this.responseText, function (key, value) {
@@ -160,10 +141,11 @@ function handleBack(event) {
     const target = event.target;
     if (target.getAttribute('class') === 'back-to-main') {
         oReq.addEventListener('load', handler);
-        oReq.open('GET','/articles');
+        oReq.open('GET','/articles?' + params);
         oReq.send();
+        showMore.reset();
     }
- }
+}
 function handleDelete(event) {
     const target = event.target;
     if (target.getAttribute('class') === 'delete') {
@@ -262,7 +244,6 @@ function handleSignIN(event) {
     function handler() {
         if (this.responseText) {
             userChange(person.login);
-            displayResetFiltPag();
             document.querySelector('.left-column').style = 'display:inline-block;';
             document.querySelector('.right-column').style = 'display:inline-block;';
             document.querySelector('.authorization').style = 'display:none;';
@@ -284,11 +265,11 @@ function handleSignIN(event) {
         oReq.addEventListener('load', handler);
         oReq.open('GET', '/signIn?' + params);
         oReq.send();
+        displayResetFiltPag();
     }
 }
 
 const showMore = (function () {
-    let total;
     const PER_PAGE = 6;
     let currentPage = 1;
     let PAGINATION_BUTTON;
@@ -297,9 +278,8 @@ const showMore = (function () {
     PAGINATION_BUTTON = document.querySelector('.show-more');
     PAGINATION_BUTTON.addEventListener('click', handleShowMoreClick);
 
-    function init(amount, CB) {
+    function init(CB) {
         currentPage = 1;
-        total = amount;
         callBack = CB;
         hideShowPagination();
     }
@@ -332,20 +312,31 @@ const showMore = (function () {
             skip: (currentPage - 1) * PER_PAGE,
         };
     }
-    function getCurrentTotal() {
-        return Math.ceil(total / PER_PAGE);
-    }
     function nextPage() {
         currentPage = currentPage + 1;
         hideShowPagination();
         return getParams();
     }
     function hideShowPagination() {
-        if (getCurrentTotal() <= currentPage) {
-            PAGINATION_BUTTON.style = 'display: none;';
-        } else {
-            PAGINATION_BUTTON.style = 'display: block;';
+        var total;
+        const oReq = new XMLHttpRequest();
+        function cleanUp() {
+            oReq.removeEventListener('load', handler);
         }
+        function handler() {
+            total = Number(JSON.parse(this.responseText));
+            if (Math.ceil(total/PER_PAGE) <= currentPage) {
+                console.log('nothing to show');
+                PAGINATION_BUTTON.style = 'display: none;';
+            } else {
+                console.log(total);
+                PAGINATION_BUTTON.style = 'display: block;';
+            }
+            cleanUp();
+        }
+        oReq.addEventListener('load', handler);
+        oReq.open('GET', '/amount');
+        oReq.send();
     }
     function reset() {
         currentPage = 1;
@@ -355,21 +346,17 @@ const showMore = (function () {
     return {
         init,
         reset,
+        getParams,
     };
 }());
 
 const filter = (function () {
     let FORM;
     let FILT_BUTTON;
-    let filterCallBack;
     FORM = document.querySelector('.filter');
     FILT_BUTTON = document.querySelector('.filt');
     FILT_BUTTON.addEventListener('click', handleFiltClick);
 
-    function init(filtCB) {
-        filterCallBack = filtCB;
-        return getFilter();
-    }
     function getFilter() {
         const authorSelect = FORM.querySelector('.in1').value;
         const fromSelect = FORM.querySelector('.in2').value;
@@ -390,7 +377,6 @@ const filter = (function () {
                 return value;
             });
             visualizer.clearDOM();
-            filterCallBack(tempArticles);
             displayArticles(tempArticles);
             cleanUp();
         }
@@ -404,6 +390,7 @@ const filter = (function () {
         oReq.addEventListener('load', handler);
         oReq.open('GET', '/articles?' + params);
         oReq.send();
+        showMore.reset();
     }
     function reset() {
         const fill = {
@@ -414,14 +401,14 @@ const filter = (function () {
         return fill;
     }
     return {
-        init,
+        getFilter,
         reset,
     };
 }());
 
 function displayResetFiltPag() {
     const filterParams = filter.reset();
-    const showMoreParams = showMore.reset();
+    const showMoreParams = showMore.getParams();
     const params = 'author=' + encodeURIComponent(filterParams.author)
         + '&upTo=' + encodeURIComponent(filterParams.upTo) + '&from=' + encodeURIComponent(filterParams.from)
         + '&top=' + encodeURIComponent(showMoreParams.top) + '&skip=' + encodeURIComponent(showMoreParams.skip);
@@ -443,11 +430,11 @@ function displayResetFiltPag() {
     oReq.addEventListener('load', handler);
     oReq.open('GET', '/articles?' + params);
     oReq.send();
+    showMore.reset();
 }
 
 function resetFiltPag() {
     const filterParams = filter.reset();
-    showMore.reset();
     const oReq = new XMLHttpRequest();
     const params = {
         author: filterParams.author,
@@ -458,4 +445,5 @@ function resetFiltPag() {
     oReq.open('PUT', '/articles/filter');
     oReq.setRequestHeader('content-type', 'application/json');
     oReq.send(body);
+    showMore.reset();
 }

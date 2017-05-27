@@ -5,5 +5,10 @@
         "indent": "off",
         "linebreak-style": "off",
         "prefer-arrow-callback": "off"
+    },
+    "globals":{
+        "document": false,
+        "XMLHttpRequest": false,
+        "visualizer": false
     }
 }

@@ -180,7 +180,7 @@ let articles = [
         exist: true,
     },
 ];
-let articleAmount = 20;
+let articleAmount;
 let latestFilter;
 const loggedUsers = [
     {
@@ -241,6 +241,8 @@ module.exports.getArticles = function (skip, top, filtItem) {
             }
         }
     }
+    if(skip == 0)
+        articleAmount = mas.length;
     return mas.slice(skip, skip + top);
 }
 module.exports.getArticle = function (id) {
