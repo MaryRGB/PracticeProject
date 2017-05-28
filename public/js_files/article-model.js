@@ -182,20 +182,6 @@ let articles = [
 ];
 let articleAmount;
 let latestFilter;
-const loggedUsers = [
-    {
-        login: 'MaryRGB',
-        password: 'qwerty123',
-    },
-    {
-        login: 'Муромец Илья',
-        password: 'богатырь',
-    },
-    {
-        login: 'Бонд Джеймс',
-        password: '007БД',
-    },
-];
 
 function compareDates(a, b) {
     return b.createdAt - a.createdAt;
@@ -244,14 +230,14 @@ module.exports.getArticles = function (skip, top, filtItem) {
     if (skip == 0)
         articleAmount = mas.length;
     return mas.slice(skip, skip + top);
-}
+};
 module.exports.getArticle = function (id) {
     for (let i = 0; i < articles.length; i++) {
         if (articles[i].id == id && articles[i].exist === true) {
             return articles[i];
         }
     }
-}
+};
 function validateArticle(article) {
     if (!article.title || !article.summary
         || !article.createdAt || !article.author || !article.content) {
@@ -281,7 +267,7 @@ module.exports.addArticle = function (article) {
         return true;
     }
     return false;
-}
+};
 module.exports.editArticle = function (article) {
     let temp = module.exports.getArticle(article.id);
     let clone = {};
@@ -300,7 +286,7 @@ module.exports.editArticle = function (article) {
         return false;
     }
     return true;
-}
+};
 
 function getIndex(id) {
     for (let i = 0; i < articles.length; i++) {
@@ -318,15 +304,10 @@ module.exports.removeArticle = function (id) {
         return true;
     }
     return false;
-}
-module.exports.findUser = function (login, password) {
-    return loggedUsers.find(function (obj) {
-        return (obj.login === login & obj.password === password);
-    });
-}
+};
 module.exports.getArticleAmount = function () {
     return articleAmount;
 }
 module.exports.changeFilter = function (filtConf) {
     latestFilter = filtConf;
-}
+};

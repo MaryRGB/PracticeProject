@@ -252,6 +252,24 @@ function handleSave(event) {
 const headNode = document.querySelector('#head');
 headNode.addEventListener('click', handleSign);
 
+function PromiseLogOut() {
+    return new Promise(function (resolve, reject) {
+        const oReq = new XMLHttpRequest();
+        function handler() {
+            if (this.status === 200) {
+                resolve();
+            }
+            reject();
+            cleanUp();
+        }
+        function cleanUp() {
+            oReq.removeEventListener('load', handler);
+        }
+        oReq.addEventListener('load', handler);
+        oReq.open('GET', '/signOut');
+        oReq.send();
+    });
+}
 function handleSign(event) {
     const target = event.target;
     if (target.textContent === 'Вход') {
@@ -264,29 +282,38 @@ function handleSign(event) {
         visualizer.clearSign();
     }
     if (target.textContent === 'Выход') {
-        displayResetFiltPag();
-        userChange();
-        document.querySelector('.left-column').style = 'display:inline-block;';
-        document.querySelector('.right-column').style = 'display:inline-block;';
-        document.querySelector('.news').style = 'display:none;';
-        document.querySelector('.authorization').style = 'display:none;';
-        document.querySelector('.add-edit').style = 'display:none;';
+        PromiseLogOut().then(function () {
+            displayResetFiltPag();
+            userChange();
+            document.querySelector('.left-column').style = 'display:inline-block;';
+            document.querySelector('.right-column').style = 'display:inline-block;';
+            document.querySelector('.news').style = 'display:none;';
+            document.querySelector('.authorization').style = 'display:none;';
+            document.querySelector('.add-edit').style = 'display:none;';
+        });
     }
 }
 function PromiseHandleSignIN(person) {
  return new Promise(function (resolve, reject) {
      const oReq = new XMLHttpRequest();
      function handler() {
-         resolve(this.responseText);
+         if (this.status === 200) {
+             resolve(this.responseText);
+         }
+         reject();
          cleanUp();
      }
      function cleanUp() {
          oReq.removeEventListener('load', handler);
      }
-     const params = 'login=' + encodeURIComponent(person.login) + '&password=' + encodeURIComponent(person.password);
      oReq.addEventListener('load', handler);
-     oReq.open('GET', '/signIn?' + params);
-     oReq.send();
+     oReq.open('POST', '/signIn');
+     oReq.setRequestHeader('content-type', 'application/json');
+     const body = JSON.stringify({
+         username: person.login,
+         password: person.password,
+     });
+     oReq.send(body);
  });
 }
 
@@ -300,15 +327,13 @@ function handleSignIN(event) {
             password: target.parentNode.querySelector('.password').value,
         };
         PromiseHandleSignIN(person).then(function (responseText) {
-            if (responseText) {
-                userChange(person.login);
-                document.querySelector('.left-column').style = 'display:inline-block;';
-                document.querySelector('.right-column').style = 'display:inline-block;';
-                document.querySelector('.authorization').style = 'display:none;';
-            } else {
-                document.querySelector('.authorization').style = 'display:none;';
-                showError();
-            }
+            userChange(responseText);
+            document.querySelector('.left-column').style = 'display:inline-block;';
+            document.querySelector('.right-column').style = 'display:inline-block;';
+            document.querySelector('.authorization').style = 'display:none;';
+        }, function () {
+            document.querySelector('.authorization').style = 'display:none;';
+            showError();
         });
         displayResetFiltPag();
     }
