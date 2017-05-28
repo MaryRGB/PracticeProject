@@ -4,13 +4,30 @@ document.addEventListener('DOMContentLoaded', startApp);
 function displayArticles(articles) {
     visualizer.insertArticlesInDOM(articles);
 }
+function PromiseStartApp() {
+    return new Promise(function (resolve, reject) {
+        function handler() {
+            if (this.responseText) {
+                resolve(this.responseText);
+                cleanUp();
+            }
+            reject();
+        }
+        function cleanUp() {
+            oReq.removeEventListener('load', handler);
+        }
+        const filterConfig = filter.getFilter();
+        const params = 'author=' + encodeURIComponent(filterConfig.author)
+            + '&upTo=' + encodeURIComponent(filterConfig.upTo) + '&from=' + encodeURIComponent(filterConfig.from);
+        const oReq = new XMLHttpRequest();
+        oReq.addEventListener('load', handler);
+        oReq.open('GET', '/articles?' + params);
+        oReq.send();
+    });
+}
 function startApp() {
-    const filterConfig = filter.getFilter();
-    const params = 'author=' + encodeURIComponent(filterConfig.author)
-        + '&upTo=' + encodeURIComponent(filterConfig.upTo) + '&from=' + encodeURIComponent(filterConfig.from);
-    const oReq = new XMLHttpRequest();
-    function handler() {
-        const tempArticles = JSON.parse(this.responseText, function (key, value) {
+    PromiseStartApp().then(function (responseText) {
+        const tempArticles = JSON.parse(responseText, function (key, value) {
             if (key === 'createdAt') {
                 return new Date(value);
             }
@@ -19,14 +36,7 @@ function startApp() {
         visualizer.init();
         visualizer.clearDOM();
         displayArticles(tempArticles);
-        cleanUp();
-    }
-    function cleanUp() {
-        oReq.removeEventListener('load', handler);
-    }
-    oReq.addEventListener('load', handler);
-    oReq.open('GET', '/articles?' + params);
-    oReq.send();
+    });
     showMore.init(displayArticles);
 }
 
@@ -40,29 +50,36 @@ function openArticle(article, id) {
     visualizer.openArt(article, id);
     document.querySelector('.news').style = 'display:block;';
 }
-
-function formToAE(type, id) {
-    let article;
-    function handler() {
-        article = JSON.parse(this.responseText, function (key, value) {
-            if (key === 'createdAt') {
-                return new Date(value);
-            }
-            return value;
-        });
-        document.querySelector('.news').style = 'display:none;';
-        visualizer.displayAE(article);
-        document.querySelector('.add-edit').style = 'display:block;';
-        cleanUp();
-    }
-    function cleanUp() {
-        oReq.removeEventListener('load', handler);
-    }
-    const oReq = new XMLHttpRequest();
-    if (type === 'edit') {
+function PromiseformToAE(id) {
+    return new Promise(function (resolve, reject) {
+        let article;
+        function handler() {
+           resolve(this.responseText);
+            cleanUp();
+        }
+        function cleanUp() {
+            oReq.removeEventListener('load', handler);
+        }
+        const oReq = new XMLHttpRequest();
         oReq.addEventListener('load', handler);
         oReq.open('GET', '/articles/edit/' + id);
         oReq.send();
+    });
+}
+function formToAE(type, id) {
+    var article;
+    if (type === 'edit'){
+        PromiseformToAE(id).then(function (responseText) {
+            article = JSON.parse(responseText, function (key, value) {
+                if (key === 'createdAt') {
+                    return new Date(value);
+                }
+                return value;
+            });
+            document.querySelector('.news').style = 'display:none;';
+            visualizer.displayAE(article);
+            document.querySelector('.add-edit').style = 'display:block;';
+        });
     } else {
         document.querySelector('.news').style = 'display:none;';
         document.querySelector('.left-column').style = 'display:none;';
@@ -74,34 +91,41 @@ function formToAE(type, id) {
     }
 }
 function showError() {
-    document.querySelector('.error').style = 'display:block;';
     document.querySelector('.show-more').style = 'display:none;';
+    document.querySelector('.error').style = 'display:block;';
 }
 
 const articleListNode = document.querySelector('.left-column');
 articleListNode.addEventListener('click', handleOpen);
 
+function PromiseHandleOpen(id) {
+    return new Promise(function(resolve, reject) {
+        const oReq = new XMLHttpRequest();
+        function cleanUp() {
+            oReq.removeEventListener('load', handler);
+        }
+        function handler() {
+            resolve(this.responseText);
+            cleanUp();
+        }
+        const string = '/articles/' + id;
+        oReq.addEventListener('load', handler);
+        oReq.open('GET', string);
+        oReq.send();
+    });
+}
 function handleOpen(event) {
-    const oReq = new XMLHttpRequest();
-    function cleanUp() {
-        oReq.removeEventListener('load', handler);
-    }
-    function handler() {
-        let oneArticle = JSON.parse(this.responseText);
-        oneArticle.createdAt = new Date(oneArticle.createdAt);
-        openArticle(oneArticle, target.getAttribute('id'));
-        cleanUp();
-    }
-
     let target = event.target;
     while (target.getAttribute('class') !== 'article') {
         target = target.parentNode;
     }
     if (target.getAttribute('class') === 'article') {
-        const string = '/articles/' + target.getAttribute('id');
-        oReq.addEventListener('load', handler);
-        oReq.open('GET', string);
-        oReq.send();
+        PromiseHandleOpen(target.getAttribute('id')).then(function (responseText) {
+            let oneArticle = JSON.parse(responseText);
+            oneArticle.createdAt = new Date(oneArticle.createdAt);
+            document.querySelector('.show-more').style = 'display:none;';
+            openArticle(oneArticle, target.getAttribute('id'));
+        });
     }
 }
 
@@ -111,38 +135,44 @@ bodyNode.addEventListener('click', handleDelete);
 bodyNode.addEventListener('click', handleAddEdit);
 bodyNode.addEventListener('click', handleSave);
 
-function handleBack(event) {
-    const filterConfig = filter.getFilter();
-    const params = 'author=' + encodeURIComponent(filterConfig.author)
-        + '&upTo=' + encodeURIComponent(filterConfig.upTo) + '&from=' + encodeURIComponent(filterConfig.from);
-    const oReq = new XMLHttpRequest();
-    function handler() {
-        const tempArticles = JSON.parse(this.responseText, function (key, value) {
-            if (key === 'createdAt') {
-                return new Date(value);
-            }
-            return value;
-        });
-        visualizer.clearDOM();
-        displayArticles(tempArticles);
-        document.querySelector('.left-column').style = 'display:inline-block;';
-        document.querySelector('.right-column').style = 'display:inline-block;';
-        document.querySelector('.show-more').style = 'display:block;';
-        document.querySelector('.news').style = 'display:none;';
-        document.querySelector('.add-edit').style = 'display:none;';
-        document.querySelector('.error').style = 'display:none;';
-        document.querySelector('.authorization').style = 'display:none;';
-        cleanUp();
-    }
-    function cleanUp() {
-        oReq.removeEventListener('load', handler);
-    }
-
-    const target = event.target;
-    if (target.getAttribute('class') === 'back-to-main') {
+function PromiseHandleBack() {
+    return new Promise(function (resolve, reject) {
+        const filterConfig = filter.getFilter();
+        const params = 'author=' + encodeURIComponent(filterConfig.author)
+            + '&upTo=' + encodeURIComponent(filterConfig.upTo) + '&from=' + encodeURIComponent(filterConfig.from);
+        const oReq = new XMLHttpRequest();
+        function handler() {
+            resolve(this.responseText);
+            cleanUp();
+        }
+        function cleanUp() {
+            oReq.removeEventListener('load', handler);
+        }
         oReq.addEventListener('load', handler);
         oReq.open('GET','/articles?' + params);
         oReq.send();
+    });
+}
+function handleBack(event) {
+    const target = event.target;
+    if (target.getAttribute('class') === 'back-to-main') {
+        PromiseHandleBack().then(function(responseText) {
+            const tempArticles = JSON.parse(responseText, function (key, value) {
+                if (key === 'createdAt') {
+                    return new Date(value);
+                }
+                return value;
+            });
+            visualizer.clearDOM();
+            displayArticles(tempArticles);
+            document.querySelector('.left-column').style = 'display:inline-block;';
+            document.querySelector('.right-column').style = 'display:inline-block;';
+            document.querySelector('.show-more').style = 'display:block;';
+            document.querySelector('.news').style = 'display:none;';
+            document.querySelector('.add-edit').style = 'display:none;';
+            document.querySelector('.error').style = 'display:none;';
+            document.querySelector('.authorization').style = 'display:none;';
+        });
         showMore.reset();
     }
 }
@@ -168,33 +198,28 @@ function handleAddEdit(event) {
         formToAE(target.getAttribute('class'), target.parentNode.getAttribute('id'));
     }
 }
+
+function PromiseHandleSave(newArticle) {
+    return new Promise(function (resolve, reject) {
+        const oReq = new XMLHttpRequest();
+        function handler() {
+            resolve(this.responseText);
+            cleanUp();
+        }
+        function cleanUp() {
+            oReq.removeEventListener('load', handler);
+        }
+            oReq.addEventListener('load', handler);
+            oReq.open('PUT', '/articles/save');
+            oReq.setRequestHeader('content-type', 'application/json');
+            const body = JSON.stringify(newArticle);
+            oReq.send(body);
+    });
+}
 function handleSave(event) {
     const target = event.target;
     const parent = target.parentNode;
-    const oReq = new XMLHttpRequest();
-    function handler() {
-        const tempArticle = JSON.parse(this.responseText, function (key, value) {
-            if (key === 'createdAt') {
-                return new Date(value);
-            }
-            return value;
-        });
-        if (tempArticle.oops == false) {
-            document.querySelector('.add-edit').style = 'display:none;';
-            openArticle(tempArticle, tempArticle.id);
-        } else {
-            document.querySelector('.add-edit').style = 'display:none;';
-            showError();
-        }
-        cleanUp();
-    }
-    function cleanUp() {
-        oReq.removeEventListener('load', handler);
-    }
     if (target.getAttribute('class') === 'save') {
-        oReq.addEventListener('load', handler);
-        oReq.open('PUT', '/articles/save');
-        oReq.setRequestHeader('content-type', 'application/json');
         const newArticle = {
             title: parent.querySelector('.in-name').value,
             summary: parent.querySelector('.in-summary').value,
@@ -204,8 +229,21 @@ function handleSave(event) {
             author: parent.querySelector('.name-who-wrote').textContent,
             exist: true,
         };
-        const body = JSON.stringify(newArticle);
-        oReq.send(body);
+        PromiseHandleSave(newArticle).then(function (responseText) {
+            const tempArticle = JSON.parse(responseText, function (key, value) {
+                if (key === 'createdAt') {
+                    return new Date(value);
+                }
+                return value;
+            });
+            if (tempArticle.oops == false) {
+                document.querySelector('.add-edit').style = 'display:none;';
+                openArticle(tempArticle, tempArticle.id);
+            } else {
+                document.querySelector('.add-edit').style = 'display:none;';
+                showError();
+            }
+        });
 
         resetFiltPag();
     }
@@ -235,36 +273,43 @@ function handleSign(event) {
         document.querySelector('.add-edit').style = 'display:none;';
     }
 }
+function PromiseHandleSignIN(person) {
+ return new Promise(function (resolve, reject) {
+     const oReq = new XMLHttpRequest();
+     function handler() {
+         resolve(this.responseText);
+         cleanUp();
+     }
+     function cleanUp() {
+         oReq.removeEventListener('load', handler);
+     }
+     const params = 'login=' + encodeURIComponent(person.login) + '&password=' + encodeURIComponent(person.password);
+     oReq.addEventListener('load', handler);
+     oReq.open('GET', '/signIn?' + params);
+     oReq.send();
+ });
+}
 
 bodyNode.addEventListener('click', handleSignIN);
 function handleSignIN(event) {
-    let person;
+    var person;
     const target = event.target;
-    const oReq = new XMLHttpRequest();
-    function handler() {
-        if (this.responseText) {
-            userChange(person.login);
-            document.querySelector('.left-column').style = 'display:inline-block;';
-            document.querySelector('.right-column').style = 'display:inline-block;';
-            document.querySelector('.authorization').style = 'display:none;';
-        } else {
-            document.querySelector('.authorization').style = 'display:none;';
-            showError();
-        }
-        cleanUp();
-    }
-    function cleanUp() {
-        oReq.removeEventListener('load', handler);
-    }
     if (target.textContent === 'Войти') {
         person = {
             login: target.parentNode.querySelector('.user-name').value,
-            password: target.parentNode.querySelector('.password').value
+            password: target.parentNode.querySelector('.password').value,
         };
-        const params = 'login=' + encodeURIComponent(person.login) + '&password=' + encodeURIComponent(person.password);
-        oReq.addEventListener('load', handler);
-        oReq.open('GET', '/signIn?' + params);
-        oReq.send();
+        PromiseHandleSignIN(person).then(function (responseText) {
+            if (responseText) {
+                userChange(person.login);
+                document.querySelector('.left-column').style = 'display:inline-block;';
+                document.querySelector('.right-column').style = 'display:inline-block;';
+                document.querySelector('.authorization').style = 'display:none;';
+            } else {
+                document.querySelector('.authorization').style = 'display:none;';
+                showError();
+            }
+        });
         displayResetFiltPag();
     }
 }
@@ -283,27 +328,38 @@ const showMore = (function () {
         callBack = CB;
         hideShowPagination();
     }
+    function PromiseHandleShowMoreClick(params) {
+     return new Promise(function (resolve, reject) {
+         const oReq = new XMLHttpRequest();
+         function handler() {
+             resolve(this.responseText);
+             cleanUp();
+         }
+         function cleanUp() {
+             oReq.removeEventListener('load', handler);
+         }
+         oReq.addEventListener('load', handler);
+         oReq.open('GET', '/articles?' + params);
+         oReq.send();
+     });
+    }
     function handleShowMoreClick(event) {
-        const oReq = new XMLHttpRequest();
-        function handler() {
-            const tempArticles = JSON.parse(this.responseText, function (key, value) {
-                if (key === 'createdAt') {
-                    return new Date(value);
-                }
-                return value;
-            });
-            callBack(tempArticles);
-            cleanUp();
-        }
-        function cleanUp() {
-            oReq.removeEventListener('load', handler);
-        }
         if (event.target.getAttribute('class') === 'show-more') {
             const paginationParams = nextPage();
-            const params = 'top=' + encodeURIComponent(paginationParams.top) + '&skip=' + encodeURIComponent(paginationParams.skip);
-            oReq.addEventListener('load', handler);
-            oReq.open('GET', '/articles?' + params);
-            oReq.send();
+            const filterParams = filter.getFilter();
+            const params = 'author=' + encodeURIComponent(filterParams.author)
+                + '&upTo=' + encodeURIComponent(filterParams.upTo) + '&from=' + encodeURIComponent(filterParams.from)
+                + '&top=' + encodeURIComponent(paginationParams.top) + '&skip=' + encodeURIComponent(paginationParams.skip);
+            PromiseHandleShowMoreClick(params).then(function (responseText) {
+                const tempArticles = JSON.parse(responseText, function (key, value) {
+                    if (key === 'createdAt') {
+                        return new Date(value);
+                    }
+                    return value;
+                });
+                callBack(tempArticles);
+            });
+            hideShowPagination();
         }
     }
     function getParams() {
@@ -314,29 +370,34 @@ const showMore = (function () {
     }
     function nextPage() {
         currentPage = currentPage + 1;
-        hideShowPagination();
+
         return getParams();
     }
+    function PromiseHideShowPagination() {
+     return new Promise(function (resolve, reject) {
+         const oReq = new XMLHttpRequest();
+         function cleanUp() {
+             oReq.removeEventListener('load', handler);
+         }
+         function handler() {
+             resolve(this.responseText);
+             cleanUp();
+         }
+         oReq.addEventListener('load', handler);
+         oReq.open('GET', '/amount');
+         oReq.send();
+     });
+     }
     function hideShowPagination() {
         var total;
-        const oReq = new XMLHttpRequest();
-        function cleanUp() {
-            oReq.removeEventListener('load', handler);
-        }
-        function handler() {
-            total = Number(JSON.parse(this.responseText));
-            if (Math.ceil(total/PER_PAGE) <= currentPage) {
-                console.log('nothing to show');
+        PromiseHideShowPagination().then(function (responseText) {
+            total = Number(JSON.parse(responseText));
+            if (Math.ceil(total / PER_PAGE) <= currentPage) {
                 PAGINATION_BUTTON.style = 'display: none;';
             } else {
-                console.log(total);
                 PAGINATION_BUTTON.style = 'display: block;';
             }
-            cleanUp();
-        }
-        oReq.addEventListener('load', handler);
-        oReq.open('GET', '/amount');
-        oReq.send();
+        });
     }
     function reset() {
         currentPage = 1;
@@ -368,9 +429,27 @@ const filter = (function () {
             upTo: upTOSelect,
         };
     }
+    function PromiseHandleFiltClick() {
+     return new Promise(function (resolve, reject) {
+         function handler() {
+             resolve(this.responseText);
+             cleanUp();
+         }
+         function cleanUp() {
+             oReq.removeEventListener('load', handler);
+         }
+         const filterParams = getFilter();
+         const params = 'author=' + encodeURIComponent(filterParams.author)
+             + '&upTo=' + encodeURIComponent(filterParams.upTo) + '&from=' + encodeURIComponent(filterParams.from);
+         let oReq = new XMLHttpRequest();
+         oReq.addEventListener('load', handler);
+         oReq.open('GET', '/articles?' + params);
+         oReq.send();
+     });
+     }
     function handleFiltClick(event) {
-        function handler() {
-            const tempArticles = JSON.parse(this.responseText, function (key, value) {
+        PromiseHandleFiltClick().then(function(responseText) {
+            const tempArticles = JSON.parse(responseText, function (key, value) {
                 if (key === 'createdAt') {
                     return new Date(value);
                 }
@@ -378,18 +457,7 @@ const filter = (function () {
             });
             visualizer.clearDOM();
             displayArticles(tempArticles);
-            cleanUp();
-        }
-        function cleanUp() {
-            oReq.removeEventListener('load', handler);
-        }
-        const filterParams = getFilter();
-        const params = 'author=' + encodeURIComponent(filterParams.author)
-            + '&upTo=' + encodeURIComponent(filterParams.upTo) + '&from=' + encodeURIComponent(filterParams.from);
-        let oReq = new XMLHttpRequest();
-        oReq.addEventListener('load', handler);
-        oReq.open('GET', '/articles?' + params);
-        oReq.send();
+        });
         showMore.reset();
     }
     function reset() {
@@ -406,15 +474,27 @@ const filter = (function () {
     };
 }());
 
+function PromiseDisplayResetFiltPag() {
+    return new Promise(function (resolve, reject) {
+        const filterParams = filter.reset();
+        const params = 'author=' + encodeURIComponent(filterParams.author)
+            + '&upTo=' + encodeURIComponent(filterParams.upTo) + '&from=' + encodeURIComponent(filterParams.from);
+        const oReq = new XMLHttpRequest();
+        function handler() {
+            resolve(this.responseText);
+            cleanUp();
+        }
+        function cleanUp() {
+            oReq.removeEventListener('load', handler);
+        }
+        oReq.addEventListener('load', handler);
+        oReq.open('GET', '/articles?' + params);
+        oReq.send();
+    });
+}
 function displayResetFiltPag() {
-    const filterParams = filter.reset();
-    const showMoreParams = showMore.getParams();
-    const params = 'author=' + encodeURIComponent(filterParams.author)
-        + '&upTo=' + encodeURIComponent(filterParams.upTo) + '&from=' + encodeURIComponent(filterParams.from)
-        + '&top=' + encodeURIComponent(showMoreParams.top) + '&skip=' + encodeURIComponent(showMoreParams.skip);
-    const oReq = new XMLHttpRequest();
-    function handler() {
-        const tempArticles = JSON.parse(this.responseText, function (key, value) {
+    PromiseDisplayResetFiltPag().then(function (responseText) {
+        const tempArticles = JSON.parse(responseText, function (key, value) {
             if (key === 'createdAt') {
                 return new Date(value);
             }
@@ -422,28 +502,26 @@ function displayResetFiltPag() {
         });
         visualizer.clearDOM();
         displayArticles(tempArticles);
-        cleanUp();
-    }
-    function cleanUp() {
-        oReq.removeEventListener('load', handler);
-    }
-    oReq.addEventListener('load', handler);
-    oReq.open('GET', '/articles?' + params);
-    oReq.send();
+    });
     showMore.reset();
 }
 
+function PromiseResetFiltPag() {
+ return new Promise(function (resolve, reject) {
+     const filterParams = filter.reset();
+     const oReq = new XMLHttpRequest();
+     const params = {
+         author: filterParams.author,
+         upTo: filterParams.upTo,
+         from: filterParams.from,
+     };
+     const body = JSON.stringify(params);
+     oReq.open('PUT', '/articles/filter');
+     oReq.setRequestHeader('content-type', 'application/json');
+     oReq.send(body);
+ });
+ }
 function resetFiltPag() {
-    const filterParams = filter.reset();
-    const oReq = new XMLHttpRequest();
-    const params = {
-        author: filterParams.author,
-        upTo: filterParams.upTo,
-        from: filterParams.from,
-    };
-    const body = JSON.stringify(params);
-    oReq.open('PUT', '/articles/filter');
-    oReq.setRequestHeader('content-type', 'application/json');
-    oReq.send(body);
+    PromiseResetFiltPag();
     showMore.reset();
 }

@@ -241,7 +241,7 @@ module.exports.getArticles = function (skip, top, filtItem) {
             }
         }
     }
-    if(skip == 0)
+    if (skip == 0)
         articleAmount = mas.length;
     return mas.slice(skip, skip + top);
 }
